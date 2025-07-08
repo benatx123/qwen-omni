@@ -1,0 +1,50 @@
+resources:
+  - name: qwen-omni-model
+    type: model
+    properties:
+      model: Qwen/Qwen2.5-Omni-7B
+      framework: transformers
+      device: 
+        type: gpu
+        count: 2
+      safetensors: true
+
+environment:
+  variables:
+    MODEL_PATH: "/path/to/model/weights"
+    DEVICE: "cuda"
+    PORT: "5000"
+
+deployment:
+  replicas: 2
+  strategy: rolling-update
+  resources:
+    limits:
+      cpu: "4"
+      memory: "16Gi"
+    requests:
+      cpu: "2"
+      memory: "8Gi"
+
+services:
+  - name: qwen-omni-service
+    type: web
+    port: 5000
+    targetPort: 5000
+    protocol: HTTP
+    healthCheck:
+      path: /health
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  - name: model-storage
+    type: persistent
+    size: 50Gi
+    accessModes:
+      - ReadWriteMany
+
+network:
+  type: internal
+  name: qwen-omni-network
