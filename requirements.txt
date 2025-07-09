@@ -4,3 +4,7 @@ transformers
 safetensors
 accelerate
 torchvision
+PyPDF2  # For PDF document ingestion
+
+# Recommended for development
+black  # Code formatter to fix line length and spacing

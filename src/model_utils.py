@@ -2,18 +2,17 @@ import torch
 import logging
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s"
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
 )
 logger = logging.getLogger(__name__)
 
+
 def load_model(model_name, device_map="auto"):
     from transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcessor
+
     try:
         model = Qwen2_5OmniForConditionalGeneration.from_pretrained(
-            model_name,
-            torch_dtype="auto",
-            device_map=device_map
+            model_name, torch_dtype="auto", device_map=device_map
         )
         processor = Qwen2_5OmniProcessor.from_pretrained(model_name)
         logger.info(f"Loaded model and processor: {model_name}")
@@ -22,14 +21,16 @@ def load_model(model_name, device_map="auto"):
         logger.error(f"Failed to load model or processor: {e}")
         raise
 
+
 def allocate_gpus(num_gpus):
     if torch.cuda.is_available() and num_gpus > 0:
-        devices = [f'cuda:{i}' for i in range(num_gpus)]
+        devices = [f"cuda:{i}" for i in range(num_gpus)]
         logger.info(f"Allocated GPUs: {devices}")
         return devices
     else:
         logger.error("No available GPUs found.")
         raise RuntimeError("No available GPUs found.")
+
 
 def process_inputs(conversation, processor):
     try:
@@ -50,6 +51,7 @@ def process_inputs(conversation, processor):
         logger.error(f"Error processing inputs: {e}")
         raise
 
+
 def decode_outputs(text_ids, processor):
     try:
         # If model.generate returns a tuple, take the first element (token ids)
@@ -60,7 +62,9 @@ def decode_outputs(text_ids, processor):
             text_ids = text_ids.cpu().tolist()
         elif isinstance(text_ids, torch.Tensor):
             text_ids = text_ids.tolist()
-        decoded = processor.batch_decode(text_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+        decoded = processor.batch_decode(
+            text_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )
         logger.info("Decoded outputs successfully.")
         return decoded
     except Exception as e:
