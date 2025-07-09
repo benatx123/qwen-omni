@@ -87,10 +87,8 @@ def ingest_folder_api():
 def infer():
     data = request.json
     conversation = data.get("conversation")
-    if not conversation:
-        return jsonify({"error": "No conversation provided"}), 400
     user_query = ""
-    if len(conversation) > 1:
+    if conversation and len(conversation) > 1:
         user_query = conversation[-1]["content"][0]["text"]
     # Retrieve context from ingested docs
     context_chunks = retrieve_context(user_query) if user_query else []
@@ -109,6 +107,8 @@ def infer():
                 ],
             },
         )
+    if not conversation:
+        return jsonify({"error": "No conversation provided"}), 400
     model_device = next(model.parameters()).device
     inputs = process_inputs(conversation, processor)
     inputs = {
